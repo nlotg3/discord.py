@@ -575,6 +575,14 @@ class PublicUserFlags(BaseFlags):
         """
         return UserFlags.spammer.value
 
+    @flag_value
+    def active_developer(self):
+        """:class:`bool`: Returns ``True`` if the user is an active developer.
+
+        .. versionadded:: 2.1
+        """
+        return UserFlags.active_developer.value
+
     def all(self) -> List[UserFlags]:
         """List[:class:`UserFlags`]: Returns all public flags the user has."""
         return [public_flag for public_flag in UserFlags if self._has_flag(public_flag.value)]
@@ -1425,6 +1433,15 @@ class ApplicationFlags(BaseFlags):
         """:class:`bool`: Returns ``True`` if the application has registered a global application
         command. This shows up as a badge in the official client."""
         return 1 << 23
+
+    @flag_value
+    def active(self):
+        """:class:`bool`: Returns ``True`` if the application has had at least one global application
+        command used in the last 30 days.
+
+        .. versionadded:: 2.1
+        """
+        return 1 << 24
 
 
 @fill_with_flags()

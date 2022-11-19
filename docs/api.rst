@@ -618,7 +618,7 @@ Guilds
 .. function:: on_invite_create(invite)
 
     Called when an :class:`Invite` is created.
-    You must have the :attr:`~Permissions.manage_channels` permission to receive this.
+    You must have :attr:`~Permissions.manage_channels` to receive this.
 
     .. versionadded:: 1.3
 
@@ -635,7 +635,7 @@ Guilds
 .. function:: on_invite_delete(invite)
 
     Called when an :class:`Invite` is deleted.
-    You must have the :attr:`~Permissions.manage_channels` permission to receive this.
+    You must have :attr:`~Permissions.manage_channels` to receive this.
 
     .. versionadded:: 1.3
 
@@ -1680,6 +1680,12 @@ of :class:`enum.Enum`.
         The user is flagged as a spammer by Discord.
 
         .. versionadded:: 2.0
+
+    .. attribute:: active_developer
+
+        The user is an active developer.
+
+        .. versionadded:: 2.1
 
 .. class:: ActivityType
 

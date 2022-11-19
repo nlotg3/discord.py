@@ -151,7 +151,7 @@ class TextChannel(discord.abc.Messageable, discord.abc.GuildChannel, Hashable):
         *not* point to an existing or valid message.
     slowmode_delay: :class:`int`
         The number of seconds a member must wait between sending messages
-        in this channel. A value of `0` denotes that it is disabled.
+        in this channel. A value of ``0`` denotes that it is disabled.
         Bots and users with :attr:`~Permissions.manage_channels` or
         :attr:`~Permissions.manage_messages` bypass slowmode.
     nsfw: :class:`bool`
@@ -310,8 +310,7 @@ class TextChannel(discord.abc.Messageable, discord.abc.GuildChannel, Hashable):
 
         Edits the channel.
 
-        You must have the :attr:`~Permissions.manage_channels` permission to
-        use this.
+        You must have :attr:`~Permissions.manage_channels` to do this.
 
         .. versionchanged:: 1.3
             The ``overwrites`` keyword-only parameter was added.
@@ -344,7 +343,7 @@ class TextChannel(discord.abc.Messageable, discord.abc.GuildChannel, Hashable):
             category.
         slowmode_delay: :class:`int`
             Specifies the slowmode rate limit for user in this channel, in seconds.
-            A value of `0` disables slowmode. The maximum value possible is `21600`.
+            A value of ``0`` disables slowmode. The maximum value possible is ``21600``.
         type: :class:`ChannelType`
             Change the type of this text channel. Currently, only conversion between
             :attr:`ChannelType.text` and :attr:`ChannelType.news` is supported. This
@@ -402,8 +401,7 @@ class TextChannel(discord.abc.Messageable, discord.abc.GuildChannel, Hashable):
         You cannot bulk delete more than 100 messages or messages that
         are older than 14 days old.
 
-        You must have the :attr:`~Permissions.manage_messages` permission to
-        use this.
+        You must have :attr:`~Permissions.manage_messages` to do this.
 
         .. versionchanged:: 2.0
 
@@ -464,9 +462,9 @@ class TextChannel(discord.abc.Messageable, discord.abc.GuildChannel, Hashable):
         ``check``. If a ``check`` is not provided then all messages are deleted
         without discrimination.
 
-        You must have the :attr:`~Permissions.manage_messages` permission to
+        You must have :attr:`~Permissions.manage_messages` to
         delete messages even if they are your own.
-        The :attr:`~Permissions.read_message_history` permission is
+        Having :attr:`~Permissions.read_message_history` is
         also needed to retrieve message history.
 
         .. versionchanged:: 2.0
@@ -536,7 +534,7 @@ class TextChannel(discord.abc.Messageable, discord.abc.GuildChannel, Hashable):
 
         Gets the list of webhooks from this channel.
 
-        Requires :attr:`~.Permissions.manage_webhooks` permissions.
+        You must have :attr:`~.Permissions.manage_webhooks` to do this.
 
         Raises
         -------
@@ -559,7 +557,7 @@ class TextChannel(discord.abc.Messageable, discord.abc.GuildChannel, Hashable):
 
         Creates a webhook for this channel.
 
-        Requires :attr:`~.Permissions.manage_webhooks` permissions.
+        You must have :attr:`~.Permissions.manage_webhooks` to do this.
 
         .. versionchanged:: 1.1
             Added the ``reason`` keyword-only parameter.
@@ -596,7 +594,8 @@ class TextChannel(discord.abc.Messageable, discord.abc.GuildChannel, Hashable):
         return Webhook.from_state(data, state=self._state)
 
     async def follow(self, *, destination: TextChannel, reason: Optional[str] = None) -> Webhook:
-        """
+        """|coro|
+
         Follows a channel using a webhook.
 
         Only news channels can be followed.
@@ -740,7 +739,7 @@ class TextChannel(discord.abc.Messageable, discord.abc.GuildChannel, Hashable):
             Defaults to ``True``.
         slowmode_delay: Optional[:class:`int`]
             Specifies the slowmode rate limit for user in this channel, in seconds.
-            The maximum value possible is `21600`. By default no slowmode rate limit
+            The maximum value possible is ``21600``. By default no slowmode rate limit
             if this is ``None``.
 
         Raises
@@ -792,7 +791,7 @@ class TextChannel(discord.abc.Messageable, discord.abc.GuildChannel, Hashable):
         """Returns an :term:`asynchronous iterator` that iterates over all archived threads in this text channel,
         in order of decreasing ID for joined threads, and decreasing :attr:`Thread.archive_timestamp` otherwise.
 
-        You must have :attr:`~Permissions.read_message_history` to use this. If iterating over private threads
+        You must have :attr:`~Permissions.read_message_history` to do this. If iterating over private threads
         then :attr:`~Permissions.manage_threads` is also required.
 
         .. versionadded:: 2.0
@@ -1132,8 +1131,7 @@ class VoiceChannel(discord.abc.Messageable, VocalGuildChannel):
         You cannot bulk delete more than 100 messages or messages that
         are older than 14 days old.
 
-        You must have the :attr:`~Permissions.manage_messages` permission to
-        use this.
+        You must have :attr:`~Permissions.manage_messages` to do this.
 
         .. versionadded:: 2.0
 
@@ -1190,9 +1188,9 @@ class VoiceChannel(discord.abc.Messageable, VocalGuildChannel):
         ``check``. If a ``check`` is not provided then all messages are deleted
         without discrimination.
 
-        You must have the :attr:`~Permissions.manage_messages` permission to
+        You must have :attr:`~Permissions.manage_messages` to
         delete messages even if they are your own.
-        The :attr:`~Permissions.read_message_history` permission is
+        Having :attr:`~Permissions.read_message_history` is
         also needed to retrieve message history.
 
         .. versionadded:: 2.0
@@ -1261,7 +1259,7 @@ class VoiceChannel(discord.abc.Messageable, VocalGuildChannel):
 
         Gets the list of webhooks from this channel.
 
-        Requires :attr:`~.Permissions.manage_webhooks` permissions.
+        You must have :attr:`~.Permissions.manage_webhooks` to do this.
 
         .. versionadded:: 2.0
 
@@ -1286,7 +1284,7 @@ class VoiceChannel(discord.abc.Messageable, VocalGuildChannel):
 
         Creates a webhook for this channel.
 
-        Requires :attr:`~.Permissions.manage_webhooks` permissions.
+        You must have :attr:`~.Permissions.manage_webhooks` to do this.
 
         .. versionadded:: 2.0
 
@@ -1356,8 +1354,7 @@ class VoiceChannel(discord.abc.Messageable, VocalGuildChannel):
 
         Edits the channel.
 
-        You must have the :attr:`~Permissions.manage_channels` permission to
-        use this.
+        You must have :attr:`~Permissions.manage_channels` to do this.
 
         .. versionchanged:: 1.3
             The ``overwrites`` keyword-only parameter was added.
@@ -1565,8 +1562,7 @@ class StageChannel(VocalGuildChannel):
 
         Create a stage instance.
 
-        You must have the :attr:`~Permissions.manage_channels` permission to
-        use this.
+        You must have :attr:`~Permissions.manage_channels` to do this.
 
         .. versionadded:: 2.0
 
@@ -1656,8 +1652,7 @@ class StageChannel(VocalGuildChannel):
 
         Edits the channel.
 
-        You must have the :attr:`~Permissions.manage_channels` permission to
-        use this.
+        You must have :attr:`~Permissions.manage_channels` to do this.
 
         .. versionchanged:: 2.0
             The ``topic`` parameter must now be set via :attr:`create_instance`.
@@ -1827,8 +1822,7 @@ class CategoryChannel(discord.abc.GuildChannel, Hashable):
 
         Edits the channel.
 
-        You must have the :attr:`~Permissions.manage_channels` permission to
-        use this.
+        You must have :attr:`~Permissions.manage_channels` to do this.
 
         .. versionchanged:: 1.3
             The ``overwrites`` keyword-only parameter was added.
@@ -2013,7 +2007,7 @@ class ForumTag(Hashable):
 
     __slots__ = ('name', 'id', 'moderated', 'emoji')
 
-    def __init__(self, *, name: str, emoji: Optional[EmojiInputType], moderated: bool = False) -> None:
+    def __init__(self, *, name: str, emoji: Optional[EmojiInputType] = None, moderated: bool = False) -> None:
         self.name: str = name
         self.id: int = 0
         self.moderated: bool = moderated
@@ -2022,8 +2016,8 @@ class ForumTag(Hashable):
             self.emoji = emoji._to_partial()
         elif isinstance(emoji, str):
             self.emoji = PartialEmoji.from_str(emoji)
-        else:
-            raise TypeError(f'emoji must be a Emoji, PartialEmoji, or str not {emoji.__class__!r}')
+        elif emoji is not None:
+            raise TypeError(f'emoji must be a Emoji, PartialEmoji, str or None not {emoji.__class__.__name__}')
 
     @classmethod
     def from_data(cls, *, state: ConnectionState, data: ForumTagPayload) -> Self:
@@ -2107,7 +2101,7 @@ class ForumChannel(discord.abc.GuildChannel, Hashable):
         It may *not* point to an existing or valid thread or message.
     slowmode_delay: :class:`int`
         The number of seconds a member must wait between creating threads
-        in this forum. A value of `0` denotes that it is disabled.
+        in this forum. A value of ``0`` denotes that it is disabled.
         Bots and users with :attr:`~Permissions.manage_channels` or
         :attr:`~Permissions.manage_messages` bypass slowmode.
     nsfw: :class:`bool`
@@ -2173,7 +2167,7 @@ class ForumChannel(discord.abc.GuildChannel, Hashable):
         self.last_message_id: Optional[int] = utils._get_as_snowflake(data, 'last_message_id')
         # This takes advantage of the fact that dicts are ordered since Python 3.7
         tags = [ForumTag.from_data(state=self._state, data=tag) for tag in data.get('available_tags', [])]
-        self.default_thread_slowmode_delay: int = data.get('default_thread_slowmode_delay', 0)
+        self.default_thread_slowmode_delay: int = data.get('default_thread_rate_limit_per_user', 0)
         self._available_tags: Dict[int, ForumTag] = {tag.id: tag for tag in tags}
 
         self.default_reaction_emoji: Optional[PartialEmoji] = None
@@ -2293,8 +2287,7 @@ class ForumChannel(discord.abc.GuildChannel, Hashable):
 
         Edits the forum.
 
-        You must have the :attr:`~Permissions.manage_channels` permission to
-        use this.
+        You must have :attr:`~Permissions.manage_channels` to do this.
 
         Parameters
         ----------
@@ -2314,7 +2307,7 @@ class ForumChannel(discord.abc.GuildChannel, Hashable):
             category.
         slowmode_delay: :class:`int`
             Specifies the slowmode rate limit for user in this forum, in seconds.
-            A value of `0` disables slowmode. The maximum value possible is `21600`.
+            A value of ``0`` disables slowmode. The maximum value possible is ``21600``.
         type: :class:`ChannelType`
             Change the type of this text forum. Currently, only conversion between
             :attr:`ChannelType.text` and :attr:`ChannelType.news` is supported. This
@@ -2407,8 +2400,7 @@ class ForumChannel(discord.abc.GuildChannel, Hashable):
 
         Creates a new tag in this forum.
 
-        You must have the :attr:`~Permissions.manage_channels` permission to
-        use this.
+        You must have :attr:`~Permissions.manage_channels` to do this.
 
         Parameters
         ----------
@@ -2483,7 +2475,7 @@ class ForumChannel(discord.abc.GuildChannel, Hashable):
             If not provided, the channel's default auto archive duration is used.
         slowmode_delay: Optional[:class:`int`]
             Specifies the slowmode rate limit for user in this channel, in seconds.
-            The maximum value possible is `21600`. By default no slowmode rate limit
+            The maximum value possible is ``21600``. By default no slowmode rate limit
             if this is ``None``.
         content: Optional[:class:`str`]
             The content of the message to send with the thread.
@@ -2544,7 +2536,7 @@ class ForumChannel(discord.abc.GuildChannel, Hashable):
             sticker_ids: SnowflakeList = [s.id for s in stickers]
 
         if view and not hasattr(view, '__discord_ui_view__'):
-            raise TypeError(f'view parameter must be View not {view.__class__!r}')
+            raise TypeError(f'view parameter must be View not {view.__class__.__name__}')
 
         if suppress_embeds:
             from .message import MessageFlags  # circular import
@@ -2596,7 +2588,7 @@ class ForumChannel(discord.abc.GuildChannel, Hashable):
 
         Gets the list of webhooks from this channel.
 
-        Requires :attr:`~.Permissions.manage_webhooks` permissions.
+        You must have :attr:`~.Permissions.manage_webhooks` to do this.
 
         Raises
         -------
@@ -2619,7 +2611,7 @@ class ForumChannel(discord.abc.GuildChannel, Hashable):
 
         Creates a webhook for this channel.
 
-        Requires :attr:`~.Permissions.manage_webhooks` permissions.
+        You must have :attr:`~.Permissions.manage_webhooks` to do this.
 
         Parameters
         -------------
@@ -2651,6 +2643,73 @@ class ForumChannel(discord.abc.GuildChannel, Hashable):
 
         data = await self._state.http.create_webhook(self.id, name=str(name), avatar=avatar, reason=reason)
         return Webhook.from_state(data, state=self._state)
+
+    async def archived_threads(
+        self,
+        *,
+        limit: Optional[int] = 100,
+        before: Optional[Union[Snowflake, datetime.datetime]] = None,
+    ) -> AsyncIterator[Thread]:
+        """Returns an :term:`asynchronous iterator` that iterates over all archived threads in this forum
+        in order of decreasing :attr:`Thread.archive_timestamp`.
+
+        You must have :attr:`~Permissions.read_message_history` to do this.
+
+        .. versionadded:: 2.0
+
+        Parameters
+        -----------
+        limit: Optional[:class:`bool`]
+            The number of threads to retrieve.
+            If ``None``, retrieves every archived thread in the channel. Note, however,
+            that this would make it a slow operation.
+        before: Optional[Union[:class:`abc.Snowflake`, :class:`datetime.datetime`]]
+            Retrieve archived channels before the given date or ID.
+
+        Raises
+        ------
+        Forbidden
+            You do not have permissions to get archived threads.
+        HTTPException
+            The request to get the archived threads failed.
+
+        Yields
+        -------
+        :class:`Thread`
+            The archived threads.
+        """
+        before_timestamp = None
+
+        if isinstance(before, datetime.datetime):
+            before_timestamp = before.isoformat()
+        elif before is not None:
+            before_timestamp = utils.snowflake_time(before.id).isoformat()
+
+        update_before = lambda data: data['thread_metadata']['archive_timestamp']
+
+        while True:
+            retrieve = 100
+            if limit is not None:
+                if limit <= 0:
+                    return
+                retrieve = max(2, min(retrieve, limit))
+
+            data = await self.guild._state.http.get_public_archived_threads(self.id, before=before_timestamp, limit=retrieve)
+
+            threads = data.get('threads', [])
+            for raw_thread in threads:
+                yield Thread(guild=self.guild, state=self.guild._state, data=raw_thread)
+                # Currently the API doesn't let you request less than 2 threads.
+                # Bail out early if we had to retrieve more than what the limit was.
+                if limit is not None:
+                    limit -= 1
+                    if limit <= 0:
+                        return
+
+            if not data.get('has_more', False):
+                return
+
+            before_timestamp = update_before(threads[-1])
 
 
 class DMChannel(discord.abc.Messageable, discord.abc.PrivateChannel, Hashable):
@@ -2754,10 +2813,18 @@ class DMChannel(discord.abc.Messageable, discord.abc.PrivateChannel, Hashable):
 
         - :attr:`~Permissions.send_tts_messages`: You cannot send TTS messages in a DM.
         - :attr:`~Permissions.manage_messages`: You cannot delete others messages in a DM.
+        - :attr:`~Permissions.create_private_threads`: There are no threads in a DM.
+        - :attr:`~Permissions.create_public_threads`: There are no threads in a DM.
+        - :attr:`~Permissions.manage_threads`: There are no threads in a DM.
+        - :attr:`~Permissions.send_messages_in_threads`: There are no threads in a DM.
 
         .. versionchanged:: 2.0
 
             ``obj`` parameter is now positional-only.
+
+        .. versionchanged:: 2.1
+
+            Thread related permissions are now set to ``False``.
 
         Parameters
         -----------
@@ -2920,12 +2987,20 @@ class GroupChannel(discord.abc.Messageable, discord.abc.PrivateChannel, Hashable
 
         - :attr:`~Permissions.send_tts_messages`: You cannot send TTS messages in a DM.
         - :attr:`~Permissions.manage_messages`: You cannot delete others messages in a DM.
+        - :attr:`~Permissions.create_private_threads`: There are no threads in a DM.
+        - :attr:`~Permissions.create_public_threads`: There are no threads in a DM.
+        - :attr:`~Permissions.manage_threads`: There are no threads in a DM.
+        - :attr:`~Permissions.send_messages_in_threads`: There are no threads in a DM.
 
         This also checks the kick_members permission if the user is the owner.
 
         .. versionchanged:: 2.0
 
             ``obj`` parameter is now positional-only.
+
+        .. versionchanged:: 2.1
+
+            Thread related permissions are now set to ``False``.
 
         Parameters
         -----------
