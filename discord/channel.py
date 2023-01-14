@@ -47,7 +47,7 @@ import datetime
 import discord.abc
 from .scheduled_event import ScheduledEvent
 from .permissions import PermissionOverwrite, Permissions
-from .enums import ChannelType, PrivacyLevel, try_enum, VideoQualityMode, EntityType
+from .enums import ChannelType, ForumLayoutType, PrivacyLevel, try_enum, VideoQualityMode, EntityType
 from .mixins import Hashable
 from . import utils
 from .utils import MISSING
@@ -231,6 +231,7 @@ class TextChannel(discord.abc.Messageable, discord.abc.GuildChannel, Hashable):
     @utils.copy_doc(discord.abc.GuildChannel.permissions_for)
     def permissions_for(self, obj: Union[Member, Role], /) -> Permissions:
         base = super().permissions_for(obj)
+        self._apply_implicit_permissions(base)
 
         # text channels do not have voice related permissions
         denied = Permissions.voice()
@@ -885,6 +886,7 @@ class VocalGuildChannel(discord.abc.Connectable, discord.abc.GuildChannel, Hasha
         'user_limit',
         '_state',
         'position',
+        'slowmode_delay',
         '_overwrites',
         'category_id',
         'rtc_region',
@@ -912,6 +914,7 @@ class VocalGuildChannel(discord.abc.Connectable, discord.abc.GuildChannel, Hasha
         self.category_id: Optional[int] = utils._get_as_snowflake(data, 'parent_id')
         self.last_message_id: Optional[int] = utils._get_as_snowflake(data, 'last_message_id')
         self.position: int = data['position']
+        self.slowmode_delay = data.get('rate_limit_per_user', 0)
         self.bitrate: int = data['bitrate']
         self.user_limit: int = data['user_limit']
         self._fill_overwrites(data)
@@ -973,6 +976,7 @@ class VocalGuildChannel(discord.abc.Connectable, discord.abc.GuildChannel, Hasha
     @utils.copy_doc(discord.abc.GuildChannel.permissions_for)
     def permissions_for(self, obj: Union[Member, Role], /) -> Permissions:
         base = super().permissions_for(obj)
+        self._apply_implicit_permissions(base)
 
         # voice channels cannot be edited by people who can't connect to them
         # It also implicitly denies all other voice perms
@@ -1042,6 +1046,13 @@ class VoiceChannel(discord.abc.Messageable, VocalGuildChannel):
         *not* point to an existing or valid message.
 
         .. versionadded:: 2.0
+    slowmode_delay: :class:`int`
+        The number of seconds a member must wait between sending messages
+        in this channel. A value of ``0`` denotes that it is disabled.
+        Bots and users with :attr:`~Permissions.manage_channels` or
+        :attr:`~Permissions.manage_messages` bypass slowmode.
+
+        .. versionadded:: 2.2
     """
 
     __slots__ = ()
@@ -1387,6 +1398,9 @@ class VoiceChannel(discord.abc.Messageable, VocalGuildChannel):
         category: Optional[:class:`CategoryChannel`]
             The new category for this channel. Can be ``None`` to remove the
             category.
+        slowmode_delay: :class:`int`
+            Specifies the slowmode rate limit for user in this channel, in seconds.
+            A value of ``0`` disables slowmode. The maximum value possible is ``21600``.
         reason: Optional[:class:`str`]
             The reason for editing this channel. Shows up on the audit log.
         overwrites: :class:`Mapping`
@@ -1417,7 +1431,6 @@ class VoiceChannel(discord.abc.Messageable, VocalGuildChannel):
             The newly edited voice channel. If the edit was only positional
             then ``None`` is returned instead.
         """
-
         payload = await self._edit(options, reason=reason)
         if payload is not None:
             # the payload will always be the proper channel payload
@@ -1477,6 +1490,13 @@ class StageChannel(VocalGuildChannel):
         The camera video quality for the stage channel's participants.
 
         .. versionadded:: 2.0
+    slowmode_delay: :class:`int`
+        The number of seconds a member must wait between sending messages
+        in this channel. A value of ``0`` denotes that it is disabled.
+        Bots and users with :attr:`~Permissions.manage_channels` or
+        :attr:`~Permissions.manage_messages` bypass slowmode.
+
+        .. versionadded:: 2.2
     """
 
     __slots__ = ('topic',)
@@ -1681,6 +1701,9 @@ class StageChannel(VocalGuildChannel):
         category: Optional[:class:`CategoryChannel`]
             The new category for this channel. Can be ``None`` to remove the
             category.
+        slowmode_delay: :class:`int`
+            Specifies the slowmode rate limit for user in this channel, in seconds.
+            A value of ``0`` disables slowmode. The maximum value possible is ``21600``.
         reason: Optional[:class:`str`]
             The reason for editing this channel. Shows up on the audit log.
         overwrites: :class:`Mapping`
@@ -2117,6 +2140,11 @@ class ForumChannel(discord.abc.GuildChannel, Hashable):
         add reaction button.
 
         .. versionadded:: 2.1
+    default_layout: :class:`ForumLayoutType`
+        The default layout for posts in this forum channel.
+        Defaults to :attr:`ForumLayoutType.not_set`.
+
+        .. versionadded:: 2.2
     """
 
     __slots__ = (
@@ -2135,6 +2163,7 @@ class ForumChannel(discord.abc.GuildChannel, Hashable):
         'default_auto_archive_duration',
         'default_thread_slowmode_delay',
         'default_reaction_emoji',
+        'default_layout',
         '_available_tags',
         '_flags',
     )
@@ -2168,6 +2197,7 @@ class ForumChannel(discord.abc.GuildChannel, Hashable):
         # This takes advantage of the fact that dicts are ordered since Python 3.7
         tags = [ForumTag.from_data(state=self._state, data=tag) for tag in data.get('available_tags', [])]
         self.default_thread_slowmode_delay: int = data.get('default_thread_rate_limit_per_user', 0)
+        self.default_layout: ForumLayoutType = try_enum(ForumLayoutType, data.get('default_forum_layout', 0))
         self._available_tags: Dict[int, ForumTag] = {tag.id: tag for tag in tags}
 
         self.default_reaction_emoji: Optional[PartialEmoji] = None
@@ -2198,11 +2228,37 @@ class ForumChannel(discord.abc.GuildChannel, Hashable):
     @utils.copy_doc(discord.abc.GuildChannel.permissions_for)
     def permissions_for(self, obj: Union[Member, Role], /) -> Permissions:
         base = super().permissions_for(obj)
+        self._apply_implicit_permissions(base)
 
         # text channels do not have voice related permissions
         denied = Permissions.voice()
         base.value &= ~denied.value
         return base
+
+    def get_thread(self, thread_id: int, /) -> Optional[Thread]:
+        """Returns a thread with the given ID.
+
+        .. note::
+
+            This does not always retrieve archived threads, as they are not retained in the internal
+            cache. Use :func:`Guild.fetch_channel` instead.
+
+        .. versionadded:: 2.2
+
+        Parameters
+        -----------
+        thread_id: :class:`int`
+            The ID to search for.
+
+        Returns
+        --------
+        Optional[:class:`Thread`]
+            The returned thread or ``None`` if not found.
+        """
+        thread = self.guild.get_thread(thread_id)
+        if thread is not None and thread.parent_id == self.id:
+            return thread
+        return None
 
     @property
     def threads(self) -> List[Thread]:
@@ -2278,6 +2334,7 @@ class ForumChannel(discord.abc.GuildChannel, Hashable):
         available_tags: Sequence[ForumTag] = ...,
         default_thread_slowmode_delay: int = ...,
         default_reaction_emoji: Optional[EmojiInputType] = ...,
+        default_layout: ForumLayoutType = ...,
         require_tag: bool = ...,
     ) -> ForumChannel:
         ...
@@ -2332,6 +2389,10 @@ class ForumChannel(discord.abc.GuildChannel, Hashable):
             The new default reaction emoji for threads in this channel.
 
             .. versionadded:: 2.1
+        default_layout: :class:`ForumLayoutType`
+            The new default layout for posts in this forum.
+
+            .. versionadded:: 2.2
         require_tag: :class:`bool`
             Whether to require a tag for threads in this channel or not.
 
@@ -2342,7 +2403,8 @@ class ForumChannel(discord.abc.GuildChannel, Hashable):
         ValueError
             The new ``position`` is less than 0 or greater than the number of channels.
         TypeError
-            The permission overwrite information is not in proper form.
+            The permission overwrite information is not in proper form or a type
+            is not the expected type.
         Forbidden
             You do not have permissions to edit the forum.
         HTTPException
@@ -2382,6 +2444,16 @@ class ForumChannel(discord.abc.GuildChannel, Hashable):
             flags = self.flags
             flags.require_tag = require_tag
             options['flags'] = flags.value
+
+        try:
+            layout = options.pop('default_layout')
+        except KeyError:
+            pass
+        else:
+            if not isinstance(layout, ForumLayoutType):
+                raise TypeError(f'default_layout parameter must be a ForumLayoutType not {layout.__class__.__name__}')
+
+            options['default_forum_layout'] = layout.value
 
         payload = await self._edit(options, reason=reason)
         if payload is not None:

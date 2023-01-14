@@ -239,10 +239,6 @@ def _transform_automod_trigger_metadata(
         except Exception:
             pass
 
-    # If cannot get trigger type from the rule and data is empty, then cannot determine trigger type
-    if not data:
-        return None
-
     # Try to infer trigger type from available keys in data
     if 'presets' in data:
         return AutoModTrigger(
@@ -251,9 +247,16 @@ def _transform_automod_trigger_metadata(
             allow_list=data.get('allow_list'),
         )
     elif 'keyword_filter' in data:
-        return AutoModTrigger(type=enums.AutoModRuleTriggerType.keyword, keyword_filter=data['keyword_filter'])  # type: ignore
+        return AutoModTrigger(
+            type=enums.AutoModRuleTriggerType.keyword,
+            keyword_filter=data['keyword_filter'],  # type: ignore
+            allow_list=data.get('allow_list'),
+            regex_patterns=data.get('regex_patterns'),
+        )
     elif 'mention_total_limit' in data:
         return AutoModTrigger(type=enums.AutoModRuleTriggerType.mention_spam, mention_limit=data['mention_total_limit'])  # type: ignore
+    else:
+        return AutoModTrigger(type=enums.AutoModRuleTriggerType.spam)
 
 
 def _transform_automod_actions(entry: AuditLogEntry, data: List[AutoModerationAction]) -> List[AutoModRuleAction]:
@@ -541,9 +544,13 @@ class AuditLogEntry(Hashable):
     -----------
     action: :class:`AuditLogAction`
         The action that was done.
-    user: :class:`abc.User`
+    user: Optional[:class:`abc.User`]
         The user who initiated this action. Usually a :class:`Member`\, unless gone
         then it's a :class:`User`.
+    user_id: Optional[:class:`int`]
+        The user ID who initiated this action.
+
+        .. versionadded:: 2.2
     id: :class:`int`
         The entry ID.
     target: Any
@@ -666,8 +673,8 @@ class AuditLogEntry(Hashable):
         # into meaningful data when requested
         self._changes = data.get('changes', [])
 
-        user_id = utils._get_as_snowflake(data, 'user_id')
-        self.user: Optional[Union[User, Member]] = self._get_member(user_id)
+        self.user_id: Optional[int] = utils._get_as_snowflake(data, 'user_id')
+        self.user: Optional[Union[User, Member]] = self._get_member(self.user_id)
         self._target_id = utils._get_as_snowflake(data, 'target_id')
 
     def _get_member(self, user_id: Optional[int]) -> Union[Member, User, None]:
@@ -745,8 +752,8 @@ class AuditLogEntry(Hashable):
     def _convert_target_channel(self, target_id: int) -> Union[abc.GuildChannel, Object]:
         return self.guild.get_channel(target_id) or Object(id=target_id)
 
-    def _convert_target_user(self, target_id: int) -> Union[Member, User, None]:
-        return self._get_member(target_id)
+    def _convert_target_user(self, target_id: int) -> Union[Member, User, Object]:
+        return self._get_member(target_id) or Object(id=target_id, type=Member)
 
     def _convert_target_role(self, target_id: int) -> Union[Role, Object]:
         return self.guild.get_role(target_id) or Object(id=target_id, type=Role)
@@ -775,8 +782,8 @@ class AuditLogEntry(Hashable):
     def _convert_target_emoji(self, target_id: int) -> Union[Emoji, Object]:
         return self._state.get_emoji(target_id) or Object(id=target_id, type=Emoji)
 
-    def _convert_target_message(self, target_id: int) -> Union[Member, User, None]:
-        return self._get_member(target_id)
+    def _convert_target_message(self, target_id: int) -> Union[Member, User, Object]:
+        return self._get_member(target_id) or Object(id=target_id, type=Member)
 
     def _convert_target_stage_instance(self, target_id: int) -> Union[StageInstance, Object]:
         return self.guild.get_stage_instance(target_id) or Object(id=target_id, type=StageInstance)
